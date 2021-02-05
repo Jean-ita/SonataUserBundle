@@ -43,17 +43,24 @@ class UserAdmin extends AbstractAdmin
         $this->formOptions['data_class'] = $this->getClass();
 
         $options = $this->formOptions;
-        $options['validation_groups'] = ['Default', 'Profile'];
-
-        if (!$this->getSubject() || null === $this->getSubject()->getId()) {
-            $options['validation_groups'] = ['Default', 'Registration'];
-        }
+        $options['validation_groups'] = (!$this->getSubject() || null === $this->getSubject()->getId()) ? 'Registration' : 'Profile';
 
         $formBuilder = $this->getFormContractor()->getFormBuilder($this->getUniqid(), $options);
 
         $this->defineFormBuilder($formBuilder);
 
         return $formBuilder;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExportFields()
+    {
+        // avoid security field to be exported
+        return array_filter(parent::getExportFields(), static function ($v) {
+            return !\in_array($v, ['password', 'salt'], true);
+        });
     }
 
     /**
@@ -237,13 +244,5 @@ class UserAdmin extends AbstractAdmin
                 ->end()
             ->end()
         ;
-    }
-
-    protected function configureExportFields(): array
-    {
-        // Avoid sensitive properties to be exported.
-        return array_filter(parent::configureExportFields(), static function (string $v): bool {
-            return !\in_array($v, ['password', 'salt'], true);
-        });
     }
 }

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Sonata\UserBundle\EventListener;
 
 use FOS\UserBundle\Model\UserManagerInterface;
-use Sonata\GoogleAuthenticator\GoogleQrUrl;
 use Sonata\UserBundle\GoogleAuthenticator\Helper;
 use Sonata\UserBundle\Model\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -77,7 +76,7 @@ final class TwoFactorLoginSuccessHandler implements AuthenticationSuccessHandler
             $secret = $this->googleAuthenticator->generateSecret();
             $user->setTwoStepVerificationCode($secret);
 
-            $qrCodeUrl = GoogleQrUrl::generate($user->getUsername(), $secret);
+            $qrCodeUrl = $this->googleAuthenticator->getUrl($user);
             $this->userManager->updateUser($user);
 
             return new Response($this->engine->render(

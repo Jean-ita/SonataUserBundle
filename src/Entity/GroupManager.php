@@ -15,7 +15,7 @@ namespace Sonata\UserBundle\Entity;
 
 use FOS\UserBundle\Doctrine\GroupManager as BaseGroupManager;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
-use Sonata\DatagridBundle\Pager\PagerInterface;
+use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\UserBundle\Model\GroupManagerInterface;
 
 /**
@@ -34,7 +34,7 @@ class GroupManager extends BaseGroupManager implements GroupManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getPager(array $criteria, int $page, int $limit = 10, array $sort = []): PagerInterface
+    public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {
         $query = $this->repository
             ->createQueryBuilder('g')
@@ -64,6 +64,12 @@ class GroupManager extends BaseGroupManager implements GroupManagerInterface
 
         $query->setParameters($parameters);
 
-        return Pager::create($query, $limit, $page);
+        $pager = new Pager();
+        $pager->setMaxPerPage($limit);
+        $pager->setQuery(new ProxyQuery($query));
+        $pager->setPage($page);
+        $pager->init();
+
+        return $pager;
     }
 }

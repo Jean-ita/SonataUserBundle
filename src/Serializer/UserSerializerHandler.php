@@ -13,81 +13,18 @@ declare(strict_types=1);
 
 namespace Sonata\UserBundle\Serializer;
 
-use JMS\Serializer\Context;
-use JMS\Serializer\GraphNavigatorInterface;
-use JMS\Serializer\Handler\SubscribingHandlerInterface;
-use JMS\Serializer\Visitor\SerializationVisitorInterface;
-use Sonata\Doctrine\Model\ManagerInterface;
+use Sonata\Form\Serializer\BaseSerializerHandler;
 
 /**
  * @author Sylvain Deloux <sylvain.deloux@ekino.com>
  */
-final class UserSerializerHandler implements SubscribingHandlerInterface
+class UserSerializerHandler extends BaseSerializerHandler
 {
     /**
-     * @var ManagerInterface
+     * {@inheritdoc}
      */
-    private $manager;
-
-    /**
-     * @var string[]
-     */
-    private static $formats = ['json', 'xml', 'yml'];
-
-    public function __construct(ManagerInterface $manager)
+    public static function getType()
     {
-        $this->manager = $manager;
-    }
-
-    public static function getSubscribingMethods(): array
-    {
-        $type = 'sonata_user_user_id';
-        $methods = [];
-
-        foreach (static::$formats as $format) {
-            $methods[] = [
-                'direction' => GraphNavigatorInterface::DIRECTION_SERIALIZATION,
-                'format' => $format,
-                'type' => $type,
-                'method' => 'serializeObjectToId',
-            ];
-
-            $methods[] = [
-                'direction' => GraphNavigatorInterface::DIRECTION_DESERIALIZATION,
-                'format' => $format,
-                'type' => $type,
-                'method' => 'deserializeObjectFromId',
-            ];
-        }
-
-        return $methods;
-    }
-
-    /**
-     * Serialize data object to id.
-     *
-     * @param object $data
-     *
-     * @return int|null
-     */
-    public function serializeObjectToId(SerializationVisitorInterface $visitor, $data, array $type, Context $context)
-    {
-        $className = $this->manager->getClass();
-
-        if ($data instanceof $className) {
-            return $visitor->visitInteger($data->getId(), $type);
-        }
-    }
-
-    /**
-     * Deserialize object from its id.
-     *
-     * @param int $data
-     *
-     * @return object|null
-     */
-    public function deserializeObjectFromId(SerializationVisitorInterface $visitor, $data, array $type)
-    {
-        return $this->manager->findOneBy(['id' => $data]);
+        return 'sonata_user_user_id';
     }
 }

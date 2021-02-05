@@ -26,7 +26,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
 use Twig\Environment;
 
 final class LoginAction
@@ -67,16 +66,10 @@ final class LoginAction
     private $session;
 
     /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-
-    /**
      * @var CsrfTokenManagerInterface
      */
     private $csrfTokenManager;
 
-    // NEXT_MAJOR: Make $translator argument mandatory.
     public function __construct(
         Environment $twig,
         UrlGeneratorInterface $urlGenerator,
@@ -84,8 +77,7 @@ final class LoginAction
         Pool $adminPool,
         TemplateRegistryInterface $templateRegistry,
         TokenStorageInterface $tokenStorage,
-        Session $session,
-        ?TranslatorInterface $translator = null
+        Session $session
     ) {
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
@@ -94,28 +86,12 @@ final class LoginAction
         $this->templateRegistry = $templateRegistry;
         $this->tokenStorage = $tokenStorage;
         $this->session = $session;
-
-        // NEXT_MAJOR: Remove this block.
-        if (null === $translator) {
-            @trigger_error(sprintf(
-                'Not passing an instance of "%s" as argument 6 to "%s()" is deprecated since'
-                .' sonata-project/user-bundle 4.10 and will be not possible in version 5.0.',
-                TranslatorInterface::class,
-                __METHOD__
-            ), \E_USER_DEPRECATED);
-            $translator = new IdentityTranslator();
-        }
-
-        $this->translator = $translator;
     }
 
     public function __invoke(Request $request): Response
     {
         if ($this->isAuthenticated()) {
-            $this->session->getFlashBag()->add(
-                'sonata_user_error',
-                $this->translator->trans('sonata_user_already_authenticated', [], 'SonataUserBundle')
-            );
+            $this->session->getFlashBag()->add('sonata_user_error', 'sonata_user_already_authenticated');
 
             return new RedirectResponse($this->urlGenerator->generate('sonata_admin_dashboard'));
         }

@@ -35,24 +35,23 @@ Here's the configuration we used, you may adapt it to your needs:
         router: { annotations: true }
         request: { converters: true }
 
-    twig:
-        exception_controller: null
-
-    framework:
-        error_controller: 'FOS\RestBundle\Controller\ExceptionController::showAction'
-
 In order to activate the API's, you'll also need to add this to your routing:
 
 .. code-block:: yaml
 
+    NelmioApiDocBundle:
+        resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+        prefix: /api/doc
+
     sonata_api_user:
         prefix: /api/user
-        resource: "@SonataUserBundle/Resources/config/routing/standard_api_nelmio_v3.xml"
+        resource: "@SonataUserBundle/Resources/config/routing/api.xml"
+
 
 Serialization
 -------------
 
-We're using ``JMSSerializationBundle's`` serialization groups to customize the inputs and outputs.
+We're using ``JMSSerializationBundle's`` serializations groups to customize the inputs & outputs.
 
 The taxonomy is as follows:
 
